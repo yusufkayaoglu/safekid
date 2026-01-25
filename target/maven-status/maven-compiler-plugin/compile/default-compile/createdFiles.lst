@@ -1,0 +1,17 @@
+com\safekid\auth\controller\AuthController.class
+com\safekid\auth\entity\ChildEntity.class
+com\safekid\auth\ParentRepository.class
+com\safekid\auth\IdGenerator.class
+com\safekid\auth\userprincipal\ParentPrincipal.class
+com\safekid\jwt\JwtService$JwtPair.class
+com\safekid\config\SecurityConfig.class
+com\safekid\auth\dto\LoginRequest.class
+com\safekid\auth\entity\AreaEntity.class
+com\safekid\auth\dto\LoginResponse.class
+com\safekid\auth\dto\RegisterRequest.class
+com\safekid\jwt\JwtAuthFilter.class
+com\safekid\SafeKidApplication.class
+com\safekid\auth\service\AuthService.class
+com\safekid\auth\entity\ParentEntity.class
+com\safekid\auth\entity\ChildLocationEntity.class
+com\safekid\jwt\JwtService.class

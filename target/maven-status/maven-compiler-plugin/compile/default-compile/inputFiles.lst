@@ -1,0 +1,16 @@
+C:\safekid\src\main\java\com\safekid\auth\controller\AuthController.java
+C:\safekid\src\main\java\com\safekid\auth\dto\LoginRequest.java
+C:\safekid\src\main\java\com\safekid\auth\dto\LoginResponse.java
+C:\safekid\src\main\java\com\safekid\auth\dto\RegisterRequest.java
+C:\safekid\src\main\java\com\safekid\auth\entity\AreaEntity.java
+C:\safekid\src\main\java\com\safekid\auth\entity\ChildEntity.java
+C:\safekid\src\main\java\com\safekid\auth\entity\ChildLocationEntity.java
+C:\safekid\src\main\java\com\safekid\auth\entity\ParentEntity.java
+C:\safekid\src\main\java\com\safekid\auth\IdGenerator.java
+C:\safekid\src\main\java\com\safekid\auth\ParentRepository.java
+C:\safekid\src\main\java\com\safekid\auth\service\AuthService.java
+C:\safekid\src\main\java\com\safekid\auth\userprincipal\ParentPrincipal.java
+C:\safekid\src\main\java\com\safekid\config\SecurityConfig.java
+C:\safekid\src\main\java\com\safekid\jwt\JwtAuthFilter.java
+C:\safekid\src\main\java\com\safekid\jwt\JwtService.java
+C:\safekid\src\main\java\com\safekid\SafeKidApplication.java
