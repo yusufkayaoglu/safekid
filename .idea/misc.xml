@@ -8,5 +8,8 @@
       </list>
     </option>
   </component>
+  <component name="ProjectResources">
+    <resource url="http://www.liquibase.org/xml/ns/dbchangelog " location="$USER_HOME$/Desktop/dbchangelog-latest.xsd" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_22" default="true" project-jdk-name="22" project-jdk-type="JavaSDK" />
 </project>

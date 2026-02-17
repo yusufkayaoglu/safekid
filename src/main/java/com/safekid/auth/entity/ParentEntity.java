@@ -1,6 +1,7 @@
 package com.safekid.auth.entity;
 
 import com.safekid.auth.util.IdGenerator;
+import com.safekid.parent.entity.ChildEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,6 +36,15 @@ public class ParentEntity {
     private String ebeveynIsAdresi;
 
     @Column(unique = true) private String ebeveynUniqueQRCode;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean ebeveynMailDogrulandi = false;
+
+    private String ebeveynDogrulamaKodu;
+    private Instant dogrulamaKoduSonKullanma;
+
+    private String sifreSifirlamaKodu;
+    private Instant sifreSifirlamaKoduSonKullanma;
 
     private Instant userOptimeForRegistration;
 

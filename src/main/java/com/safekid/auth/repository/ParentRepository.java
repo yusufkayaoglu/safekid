@@ -18,6 +18,8 @@ public interface ParentRepository extends JpaRepository<ParentEntity, String> {
 
     boolean existsByEbeveynMailAdres(String ebeveynMailAdres);
 
+    Optional<ParentEntity> findByEbeveynMailAdres(String ebeveynMailAdres);
+
     // JWT logout / session kontrolü için (opsiyonel ama profesyonel)
     @Query("""
         select p
