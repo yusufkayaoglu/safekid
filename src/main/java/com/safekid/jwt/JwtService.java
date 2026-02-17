@@ -1,6 +1,7 @@
 package com.safekid.jwt;
 
 import com.safekid.auth.entity.ParentEntity;
+import com.safekid.parent.entity.ChildEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -47,4 +48,40 @@ public class JwtService {
     public Jws<Claims> parse(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
     }
+
+    public String generateChildToken(ChildEntity child) {
+        return Jwts.builder()
+                .setSubject(child.getCocukUniqueId())
+                .claim("type", "CHILD") // filter ayırabilsin diye kritik
+                .claim("cocukUniqueId", child.getCocukUniqueId())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 2592000000L)) // 30 gün
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+    public JwtPair issueChildToken(ChildEntity c) {
+        Instant now = Instant.now();
+        Instant exp = now.plus(Duration.ofDays(30));
+
+        String jwt = Jwts.builder()
+                .setSubject(c.getCocukUniqueId())          // subject = childId
+                .claim("type", "CHILD")
+                .claim("cocukUniqueId", c.getCocukUniqueId())
+                .claim("ebeveynUniqueId", c.getParent().getEbeveynUniqueId()) // opsiyonel
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(exp))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return new JwtPair(jwt, exp);
+    }
+
+
+
+
+
+
+
 }

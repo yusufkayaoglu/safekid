@@ -1,0 +1,11 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="db.changelog/001-create-parent-table.xml"/>
+    <include file="db.changelog/002-create-children-table.xml"/>
+    <include file="db.changelog/003-create-cocuk-konum.xml"/>
+    <include file="db.changelog/004-cleanup-cocuk-konum-columns.xml"/>
+
+</databaseChangeLog>

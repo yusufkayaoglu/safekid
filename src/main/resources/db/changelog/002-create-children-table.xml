@@ -1,0 +1,38 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-create-children-table" author="yusuf">
+
+        <createTable tableName="children">
+            <column name="cocuk_unique_id" type="varchar(32)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="cocuk_adi" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cocuk_soyadi" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cocuk_telefon_no" type="varchar(50)"/>
+            <column name="cocuk_mail" type="varchar(255)"/>
+
+            <column name="ebeveyn_unique_id" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="children"
+                baseColumnNames="ebeveyn_unique_id"
+                referencedTableName="parents"
+                referencedColumnNames="ebeveyn_unique_id"
+                constraintName="fk_children_parent"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,4 +1,3 @@
 package com.safekid.auth.dto;
 
-public record LoginRequest(String ebeveynUserCode, String ebeveynPassword) {}
-
+public record LoginRequest(String ebeveynMailAdres, String ebeveynPassword) {}
