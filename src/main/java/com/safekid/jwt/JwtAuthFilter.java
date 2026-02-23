@@ -33,8 +33,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
+
+        // SSE async dispatch: SecurityContext zaten set edilmişse tekrar parse etme
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            chain.doFilter(req, res);
+            return;
+        }
 
         String header = req.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {

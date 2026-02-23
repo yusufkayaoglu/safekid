@@ -1,0 +1,38 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Drop the orphaned FK that points to the empty 'children' table -->
+    <changeSet id="006-drop-fk-konum-children" author="yusuf">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_konum_child" foreignKeyTableName="cocuk_konum"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="cocuk_konum" constraintName="fk_konum_child"/>
+    </changeSet>
+
+    <!-- Add correct FK pointing to 'cocuk' where data actually lives -->
+    <changeSet id="006-add-fk-konum-cocuk" author="yusuf">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_konum_cocuk" foreignKeyTableName="cocuk_konum"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="cocuk_konum"
+                baseColumnNames="cocuk_unique_id"
+                referencedTableName="cocuk"
+                referencedColumnNames="cocuk_unique_id"
+                constraintName="fk_konum_cocuk"/>
+    </changeSet>
+
+    <!-- Drop the empty 'children' table (data was always in 'cocuk') -->
+    <changeSet id="006-drop-empty-children-table" author="yusuf">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="children"/>
+        </preConditions>
+        <dropTable tableName="children"/>
+    </changeSet>
+
+</databaseChangeLog>

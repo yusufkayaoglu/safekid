@@ -126,7 +126,17 @@ public class ChildLocationService {
                         );
                     }
 
-                    Instant recordedAt = (Instant) row[3];
+                    Object rawTs = row[3];
+                    Instant recordedAt;
+                    if (rawTs instanceof Instant i) {
+                        recordedAt = i;
+                    } else if (rawTs instanceof java.sql.Timestamp ts) {
+                        recordedAt = ts.toInstant();
+                    } else if (rawTs instanceof java.time.OffsetDateTime odt) {
+                        recordedAt = odt.toInstant();
+                    } else {
+                        recordedAt = Instant.now();
+                    }
                     return new MapChildLocation(
                             child.getCocukUniqueId(),
                             child.getCocukAdi() + " " + child.getCocukSoyadi(),
