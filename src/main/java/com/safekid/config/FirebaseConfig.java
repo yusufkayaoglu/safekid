@@ -35,8 +35,13 @@ public class FirebaseConfig {
     public FirebaseApp firebaseApp() throws IOException {
         InputStream credentialsStream = null;
 
-        if (credentialsBase64 != null && !credentialsBase64.isBlank()) {
-            byte[] decoded = Base64.getDecoder().decode(credentialsBase64);
+        // @Value ile gelmediyse System.getenv'den direkt oku
+        String base64 = (credentialsBase64 != null && !credentialsBase64.isBlank())
+                ? credentialsBase64
+                : System.getenv("FIREBASE_CREDENTIALS_BASE64");
+
+        if (base64 != null && !base64.isBlank()) {
+            byte[] decoded = Base64.getDecoder().decode(base64.trim());
             credentialsStream = new ByteArrayInputStream(decoded);
         } else if (credentialsPath != null && !credentialsPath.isBlank()) {
             Resource resource = new org.springframework.core.io.ClassPathResource(
