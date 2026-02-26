@@ -3,6 +3,8 @@ package com.safekid.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,8 @@ import java.util.Base64;
 
 @Configuration
 public class FirebaseConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
 
     @Value("${firebase.credentials.path:}")
     private String credentialsPath;
@@ -37,10 +41,13 @@ public class FirebaseConfig {
         } else if (credentialsPath != null && !credentialsPath.isBlank()) {
             Resource resource = new org.springframework.core.io.ClassPathResource(
                     credentialsPath.replaceFirst("^classpath:", ""));
-            credentialsStream = resource.getInputStream();
+            if (resource.exists()) {
+                credentialsStream = resource.getInputStream();
+            }
         }
 
         if (credentialsStream == null) {
+            log.info("Firebase credentials bulunamadı, Firebase başlatılmıyor.");
             return null;
         }
 
