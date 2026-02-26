@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="012-drop-belirlenen-alan" author="safekid">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="belirlenen_alan"/>
+        </preConditions>
+        <dropTable tableName="belirlenen_alan" cascadeConstraints="true"/>
+    </changeSet>
+
+    <changeSet id="012-drop-children" author="safekid">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="children"/>
+        </preConditions>
+        <dropTable tableName="children" cascadeConstraints="true"/>
+    </changeSet>
+
+</databaseChangeLog>

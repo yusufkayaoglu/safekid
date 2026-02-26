@@ -39,10 +39,8 @@ public class AuthService {
         p.setEbeveynSoyadi(req.ebeveynSoyadi());
         p.setEbeveynUserCode(req.ebeveynUserCode());
         p.setEbeveynMailAdres(req.ebeveynMailAdres());
-        p.setEbeveynTelefonNumarasi(req.ebeveynTelefonNumarasi());
         p.setEbeveynPassword(passwordEncoder.encode(req.ebeveynPassword()));
         p.setEbeveynAdres(req.ebeveynAdres());
-        p.setEbeveynEvTelefonNumarasi(req.ebeveynEvTelefonNumarasi());
         p.setEbeveynIsAdresi(req.ebeveynIsAdresi());
 
         String code = emailService.generateVerificationCode();

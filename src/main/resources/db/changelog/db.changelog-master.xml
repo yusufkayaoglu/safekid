@@ -8,5 +8,12 @@
     <include file="db.changelog/004-cleanup-cocuk-konum-columns.xml"/>
     <include file="db.changelog/005-fix-recorded-at-timestamptz.xml"/>
     <include file="db.changelog/006-fix-cocuk-table-fk.xml"/>
-
+    <include file="db.changelog/007-create-guvenli-alan.xml"/>
+    <include file="db.changelog/008-create-alan-ihlal-bildirimi.xml"/>
+    <include file="db.changelog/009-add-fcm-token.xml"/>
+    <include file="db.changelog/010-remove-phone-columns.xml"/>
+    <include file="db.changelog/011-remove-cocuk-mail.xml"/>
+    <include file="db.changelog/012-drop-unused-tables.xml"/>
+    <include file="db.changelog/013-add-son-bildirim-zamani.xml"/>
+    <include file="db.changelog/014-create-abonelik.xml"/>
 </databaseChangeLog>

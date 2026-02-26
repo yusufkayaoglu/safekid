@@ -2,6 +2,7 @@ package com.safekid.parent.service;
 
 import com.safekid.auth.util.IdGenerator;
 import com.safekid.auth.entity.ParentEntity;
+import com.safekid.auth.repository.ParentRepository;
 import com.safekid.auth.userprincipal.ParentPrincipalService;
 import com.safekid.child.dto.LocationResponse;
 import com.safekid.child.service.ChildLocationService;
@@ -20,12 +21,16 @@ public class ParentService {
     private final ParentPrincipalService principalService;
     private final ChildRepository childRepository;
     private final ChildLocationService childLocationService;
+    private final ParentRepository parentRepo;
 
-
-    public ParentService(ParentPrincipalService principalService, ChildRepository childRepository,ChildLocationService childLocationService) {
+    public ParentService(ParentPrincipalService principalService,
+                         ChildRepository childRepository,
+                         ChildLocationService childLocationService,
+                         ParentRepository parentRepo) {
         this.principalService = principalService;
         this.childRepository = childRepository;
         this.childLocationService = childLocationService;
+        this.parentRepo = parentRepo;
     }
 
     @Transactional
@@ -36,8 +41,6 @@ public class ParentService {
         child.setCocukUniqueId(IdGenerator.newId());
         child.setCocukAdi(req.cocukAdi());
         child.setCocukSoyadi(req.cocukSoyadi());
-        child.setCocukTelefonNo(req.cocukTelefonNo());
-        child.setCocukMail(req.cocukMail());
         child.setParent(parent);
 
         childRepository.save(child);
@@ -45,9 +48,7 @@ public class ParentService {
         return new ChildResponse(
                 child.getCocukUniqueId(),
                 child.getCocukAdi(),
-                child.getCocukSoyadi(),
-                child.getCocukTelefonNo(),
-                child.getCocukMail()
+                child.getCocukSoyadi()
         );
     }
 
@@ -66,6 +67,19 @@ public class ParentService {
                 childId
         );
 
+    }
+
+    @Transactional
+    public void updateFcmToken(String parentId, String token) {
+
+        ParentEntity parent = parentRepo.findById(parentId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Parent bulunamadı"));
+
+        parent.setFcmToken(token == null || token.isBlank() ? null : token);
+
+        parentRepo.save(parent);
     }
 
 }

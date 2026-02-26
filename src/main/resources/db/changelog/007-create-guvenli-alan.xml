@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        007 — Polygon tabanlı güvenli alan tablosu
+        ───────────────────────────────────────────
+        GeoJSON Polygon verisi JSONB sütununda saklanır.
+        Örnek geo_json değeri:
+        {
+          "type": "Polygon",
+          "coordinates": [
+            [[28.979, 41.013], [28.981, 41.013], [28.981, 41.015], [28.979, 41.013]]
+          ]
+        }
+    -->
+    <changeSet id="007-create-guvenli-alan" author="safekid">
+
+        <createTable tableName="guvenli_alan" remarks="Polygon tabanlı ebeveyn güvenli alan (geofence)">
+
+            <column name="id" type="bigint" autoIncrement="true" remarks="Birincil anahtar">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="cocuk_unique_id" type="varchar(32)" remarks="İlgili çocuğun ID'si">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="alan_adi" type="varchar(100)" remarks="Kullanıcı dostu alan adı (Ev, Okul vb.)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="geo_json" type="jsonb"
+                    remarks="GeoJSON Polygon — koordinatlar [lng, lat] çiftleri">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="aktif" type="boolean" defaultValueBoolean="true"
+                    remarks="false → soft-delete ile kaldırılmış">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="olusturulma_tarihi" type="timestamptz"
+                    remarks="Oluşturulma zamanı (UTC)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- cocuk tablosuna FK (CASCADE DELETE: çocuk silinince alanları da silinir) -->
+        <addForeignKeyConstraint
+                constraintName="fk_guvenli_alan_cocuk"
+                baseTableName="guvenli_alan"
+                baseColumnNames="cocuk_unique_id"
+                referencedTableName="cocuk"
+                referencedColumnNames="cocuk_unique_id"
+                onDelete="CASCADE"/>
+
+        <!-- Aktif alan sorgulamasını hızlandırmak için bileşik indeks -->
+        <createIndex indexName="idx_guvenli_alan_cocuk_aktif"
+                     tableName="guvenli_alan">
+            <column name="cocuk_unique_id"/>
+            <column name="aktif"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

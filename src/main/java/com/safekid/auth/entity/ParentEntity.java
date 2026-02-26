@@ -28,9 +28,6 @@ public class ParentEntity {
 
     @Column(unique = true) private String ebeveynMailAdres;
 
-    private String ebeveynTelefonNumarasi;
-    private String ebeveynEvTelefonNumarasi;
-
     @Column(length = 2048) private String ebeveynToken; // opsiyonel
     private String ebeveynAdres;
     private String ebeveynIsAdresi;
@@ -45,11 +42,9 @@ public class ParentEntity {
 
     private String sifreSifirlamaKodu;
     private Instant sifreSifirlamaKoduSonKullanma;
-
+    @Column(name = "fcm_token")
+    private String fcmToken;
     private Instant userOptimeForRegistration;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AreaEntity> belirlenenAlanlar = new ArrayList<>();
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChildEntity> cocukBilgileri = new ArrayList<>();

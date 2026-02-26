@@ -47,20 +47,30 @@ public class AnomalyDetectionService {
 
     private static final String SYSTEM_PROMPT = """
             Sen bir çocuk güvenlik takip sisteminin anomali tespit modülüsün.
-            Verilen konum verilerini analiz ederek olağandışı durumları tespit et.
+            Verilen konum verilerini analiz ederek GERÇEK olağandışı durumları tespit et.
 
-            Kontrol et:
-            - Anormal hız (çocuk için olağandışı yüksek hız)
-            - Gece saatlerinde (23:00-06:00) hareket
-            - Beklenmedik bölgeler
-            - Ani yön değişiklikleri
+            ÖNEMLİ — GPS DOĞRULUĞU HAKKINDA:
+            - Mobil GPS doğruluğu tipik olarak 5-50 metre arasındadır.
+            - 100 metreden küçük konum sıçramaları GPS gürültüsüdür, gerçek hareket DEĞİLDİR.
+            - Çocuk sabit duruyorsa bile GPS konumu sürekli hafifçe değişir, bu normaldir.
+            - Sabit konumda 8-15 km/h gibi anlık hız değerleri GPS hatasından kaynaklanır, alarm üretme.
+
+            SADECE şunları flag'le:
+            - HIGH_SPEED: 60 saniyelik pencerede ortalama hız > eşik değeri (gerçek araç hareketi)
+            - NIGHT_MOVEMENT: Gece 23:00-06:00 arasında VE çocuk gerçekten yer değiştirmiş (>150m)
+            - UNKNOWN_AREA: Tamamen bilinmeyen bir bölgeye ciddi mesafe kat edilmişse
+
+            FLAGLEME:
+            - SUDDEN_DIRECTION_CHANGE: GPS gürültüsü olduğu için bu tipi KULLANMA
+            - Sabit konumda olan çocuk için asla NIGHT_MOVEMENT flagleme
+            - 100m altındaki konum sıçramalarını anomali sayma
 
             SADECE aşağıdaki JSON formatında yanıt ver:
             {
               "anomalyDetected": true/false,
               "anomalies": [
                 {
-                  "type": "HIGH_SPEED | NIGHT_MOVEMENT | UNKNOWN_AREA | SUDDEN_DIRECTION_CHANGE",
+                  "type": "HIGH_SPEED | NIGHT_MOVEMENT | UNKNOWN_AREA",
                   "description": "Açıklama",
                   "severity": "LOW | MEDIUM | HIGH | CRITICAL",
                   "lat": 0.0,
@@ -89,19 +99,25 @@ public class AnomalyDetectionService {
         List<String> localFlags = new ArrayList<>();
         boolean suspiciousFound = false;
 
+        // GPS gürültüsü eşiği: 50m — evde uyuyan çocuğun GPS sapması tipik olarak <20m
+        boolean stationary = dataCollector.isStationary(recentLocations, 50);
+
+        // Anlık hız yerine 60 saniyelik kayan pencere ortalaması kullan (GPS gürültüsüne karşı)
+        double maxWindowSpeed = 0;
         for (int i = 1; i < recentLocations.size(); i++) {
-            double speed = dataCollector.calculateSpeedKmh(recentLocations.get(i - 1), recentLocations.get(i));
-            if (speed > speedThresholdKmh) {
-                localFlags.add(String.format("Yüksek hız tespit: %.1f km/h", speed));
-                suspiciousFound = true;
-            }
+            double windowSpeed = dataCollector.calculateWindowAverageSpeedKmh(recentLocations, i, 60);
+            maxWindowSpeed = Math.max(maxWindowSpeed, windowSpeed);
+        }
+        if (maxWindowSpeed > speedThresholdKmh) {
+            localFlags.add(String.format("Yüksek ortalama hız tespit: %.1f km/h (60 sn pencere)", maxWindowSpeed));
+            suspiciousFound = true;
         }
 
-        // Check night movement
+        // Gece hareketi: sadece çocuk gerçekten yer değiştirmişse flag'le
         ZonedDateTime lastTime = recentLocations.getLast().getRecordedAt()
                 .atZone(ZoneId.of("Europe/Istanbul"));
         int hour = lastTime.getHour();
-        if (hour >= 23 || hour < 6) {
+        if ((hour >= 23 || hour < 6) && !stationary) {
             localFlags.add("Gece saatinde hareket tespit edildi: " + lastTime.toLocalTime());
             suspiciousFound = true;
         }
@@ -112,9 +128,12 @@ public class AnomalyDetectionService {
 
         // Call Claude for detailed analysis
         String locationData = dataCollector.formatLocationsForPrompt(recentLocations);
+        String stationaryNote = stationary
+                ? "NOT: Çocuk sabit konumda (GPS sürüklenmesi var, gerçek hareket yok).\n"
+                : "";
         String userMessage = String.format("""
                 Çocuk: %s %s
-                Yerel ön-filtreleme bulguları: %s
+                %sYerel ön-filtreleme bulguları: %s
 
                 === Son Konum Verileri ===
                 %s
@@ -122,6 +141,7 @@ public class AnomalyDetectionService {
                 Bu verileri analiz et ve anomalileri belirle.
                 """,
                 child.getCocukAdi(), child.getCocukSoyadi(),
+                stationaryNote,
                 String.join("; ", localFlags),
                 locationData);
 
@@ -174,17 +194,21 @@ public class AnomalyDetectionService {
         boolean suspiciousFound = false;
         List<String> localFlags = new ArrayList<>();
 
+        boolean stationary = dataCollector.isStationary(locations, 50);
+
+        double maxWindowSpeed = 0;
         for (int i = 1; i < locations.size(); i++) {
-            double speed = dataCollector.calculateSpeedKmh(locations.get(i - 1), locations.get(i));
-            if (speed > speedThresholdKmh) {
-                localFlags.add(String.format("Yüksek hız: %.1f km/h", speed));
-                suspiciousFound = true;
-            }
+            double windowSpeed = dataCollector.calculateWindowAverageSpeedKmh(locations, i, 60);
+            maxWindowSpeed = Math.max(maxWindowSpeed, windowSpeed);
+        }
+        if (maxWindowSpeed > speedThresholdKmh) {
+            localFlags.add(String.format("Yüksek ortalama hız: %.1f km/h (60 sn pencere)", maxWindowSpeed));
+            suspiciousFound = true;
         }
 
         ZonedDateTime lastTime = locations.getLast().getRecordedAt().atZone(ZoneId.of("Europe/Istanbul"));
         int hour = lastTime.getHour();
-        if (hour >= 23 || hour < 6) {
+        if ((hour >= 23 || hour < 6) && !stationary) {
             localFlags.add("Gece hareketi: " + lastTime.toLocalTime());
             suspiciousFound = true;
         }
@@ -192,9 +216,12 @@ public class AnomalyDetectionService {
         if (!suspiciousFound) return;
 
         String locationData = dataCollector.formatLocationsForPrompt(locations);
+        String stationaryNote = stationary
+                ? "NOT: Çocuk sabit konumda (GPS sürüklenmesi var, gerçek hareket yok).\n"
+                : "";
         String userMessage = String.format("""
                 Çocuk: %s %s
-                Yerel bulgular: %s
+                %sYerel bulgular: %s
 
                 === Son Konum Verileri ===
                 %s
@@ -202,6 +229,7 @@ public class AnomalyDetectionService {
                 Analiz et ve anomalileri belirle.
                 """,
                 child.getCocukAdi(), child.getCocukSoyadi(),
+                stationaryNote,
                 String.join("; ", localFlags), locationData);
 
         String aiResponse = claudeApiClient.sendMessage(SYSTEM_PROMPT, userMessage);

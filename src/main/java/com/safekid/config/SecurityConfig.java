@@ -31,11 +31,18 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+
+                        // ASYNC dispatch (SSE) + ERROR dispatch (/error forward) izin ver
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
+
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/parent/sse/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+
                         .requestMatchers("/child/location", "/child/location/**").hasRole("CHILD")
                         .requestMatchers("/parent/**").hasRole("PARENT")
+
                         .anyRequest().authenticated()
                 )
 
@@ -50,6 +57,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

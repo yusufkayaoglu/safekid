@@ -45,17 +45,10 @@ public class ChildService {
         if (req.cocukSoyadi() == null || req.cocukSoyadi().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cocukSoyadi zorunlu");
 
-        if (req.cocukTelefonNo() != null && !req.cocukTelefonNo().isBlank()) {
-            boolean phoneExists = childRepository.existsByCocukTelefonNoAndParent_EbeveynUniqueId(req.cocukTelefonNo(), parentId);
-            if (phoneExists) throw new ResponseStatusException(HttpStatus.CONFLICT, "Bu telefon numarası zaten kayıtlı");
-        }
-
         ChildEntity c = new ChildEntity();
         c.setCocukUniqueId(IdGenerator.newId());
         c.setCocukAdi(req.cocukAdi().trim());
         c.setCocukSoyadi(req.cocukSoyadi().trim());
-        c.setCocukTelefonNo(req.cocukTelefonNo());
-        c.setCocukMail(req.cocukMail());
         c.setParent(parent);
 
         childRepository.save(c);
@@ -90,9 +83,7 @@ public class ChildService {
         return new ChildResponse(
                 c.getCocukUniqueId(),
                 c.getCocukAdi(),
-                c.getCocukSoyadi(),
-                c.getCocukTelefonNo(),
-                c.getCocukMail()
+                c.getCocukSoyadi()
         );
     }
 

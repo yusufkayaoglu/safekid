@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="014-create-abonelik" author="safekid">
+        <createTable tableName="abonelik">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ebeveyn_unique_id" type="varchar(26)">
+                <constraints nullable="false"
+                             foreignKeyName="fk_abonelik_ebeveyn"
+                             referencedTableName="ebeveyn"
+                             referencedColumnNames="ebeveyn_unique_id"/>
+            </column>
+            <column name="product_id" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- UNIQUE: replay attack koruması -->
+            <column name="purchase_token" type="varchar(512)">
+                <constraints nullable="false" unique="true"
+                             uniqueConstraintName="uq_abonelik_purchase_token"/>
+            </column>
+            <column name="order_id" type="varchar(100)"/>
+            <column name="package_name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time_millis" type="bigint"/>
+            <column name="expiry_time_millis" type="bigint"/>
+            <column name="auto_renewing" type="boolean"/>
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verified_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
