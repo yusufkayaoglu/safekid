@@ -17,6 +17,10 @@ public class FcmService {
 
     private final FirebaseApp firebaseApp;
 
+    public FcmService() {
+        this.firebaseApp = null;
+    }
+
     @Autowired(required = false)
     public FcmService(@Nullable FirebaseApp firebaseApp) {
         this.firebaseApp = firebaseApp;
