@@ -6,8 +6,6 @@ public record RegisterRequest(
         String ebeveynUserCode,
         String ebeveynPassword,
         String ebeveynMailAdres,
-        String ebeveynTelefonNumarasi,
         String ebeveynAdres,
-        String ebeveynEvTelefonNumarasi,
         String ebeveynIsAdresi
 ) {}

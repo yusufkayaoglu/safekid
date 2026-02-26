@@ -12,8 +12,6 @@ public interface ChildRepository extends JpaRepository<ChildEntity, String> {
 
     Optional<ChildEntity> findByCocukUniqueIdAndParent_EbeveynUniqueId(String childId, String parentId);
 
-    boolean existsByCocukTelefonNoAndParent_EbeveynUniqueId(String phone, String parentId);
-
     Optional<ChildEntity> findByCocukUniqueId(String cocukUniqueId);
 
 }

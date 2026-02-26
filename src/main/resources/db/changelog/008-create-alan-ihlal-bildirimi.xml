@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Güvenli alan ihlal bildirimleri.
+        Her ihlalde bir kayıt eklenir; SSE bağlantısı olmasa bile
+        ebeveyn sonradan bu tabloyu sorgulayarak kaçırdığı uyarıları görebilir.
+    -->
+    <changeSet id="008-create-alan-ihlal-bildirimi" author="safekid">
+        <createTable tableName="alan_ihlal_bildirimi">
+
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Hangi çocuk -->
+            <column name="cocuk_unique_id" type="VARCHAR(32)">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ihlal_cocuk"
+                             references="cocuk(cocuk_unique_id)"/>
+            </column>
+
+            <!-- Hangi güvenli alan -->
+            <column name="geofence_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ihlal_geofence"
+                             references="guvenli_alan(id)"/>
+            </column>
+
+            <!-- Snapshot: alan silinse bile uyarı okunabilsin -->
+            <column name="alan_adi" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- İhlal anındaki konum -->
+            <column name="lat" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lng" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Zaman damgası -->
+            <column name="zaman" type="TIMESTAMPTZ" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Ebeveyn uyarıyı gördü mü? -->
+            <column name="okundu" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- Ebeveynin "okunmamış uyarılarım" sorgusunu hızlandır -->
+        <createIndex tableName="alan_ihlal_bildirimi"
+                     indexName="idx_ihlal_cocuk_okundu">
+            <column name="cocuk_unique_id"/>
+            <column name="okundu"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>

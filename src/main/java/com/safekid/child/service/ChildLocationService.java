@@ -6,6 +6,7 @@ import com.safekid.child.dto.MapChildLocation;
 import com.safekid.child.entity.CocukKonumEntity;
 import com.safekid.child.repository.CocukKonumRepository;
 import com.safekid.child.sse.SseEmitterRegistry;
+import com.safekid.geofence.service.GeofenceService;
 import com.safekid.parent.entity.ChildEntity;
 import com.safekid.parent.repository.ChildRepository;
 import jakarta.transaction.Transactional;
@@ -25,13 +26,16 @@ public class ChildLocationService {
     private final CocukKonumRepository konumRepo;
     private final ChildRepository childRepo;
     private final SseEmitterRegistry sseRegistry;
+    private final GeofenceService geofenceService;
 
     public ChildLocationService(CocukKonumRepository konumRepo,
                                 ChildRepository childRepo,
-                                SseEmitterRegistry sseRegistry) {
-        this.konumRepo = konumRepo;
-        this.childRepo = childRepo;
-        this.sseRegistry = sseRegistry;
+                                SseEmitterRegistry sseRegistry,
+                                GeofenceService geofenceService) {
+        this.konumRepo       = konumRepo;
+        this.childRepo       = childRepo;
+        this.sseRegistry     = sseRegistry;
+        this.geofenceService = geofenceService;
     }
 
     @Transactional
@@ -49,8 +53,9 @@ public class ChildLocationService {
 
         konumRepo.save(konum);
 
-        // Parent'a realtime push (SSE)
         String parentId = child.getParent().getEbeveynUniqueId();
+
+        // 🔥 realtime map update
         sseRegistry.send(parentId, new MapChildLocation(
                 childId,
                 child.getCocukAdi() + " " + child.getCocukSoyadi(),
@@ -60,6 +65,12 @@ public class ChildLocationService {
                 true
         ));
 
+        geofenceService.checkAndAlert(
+                childId, parentId,
+                child.getCocukAdi() + " " + child.getCocukSoyadi(),
+                child.getParent().getFcmToken(),
+                konum.getLat(), konum.getLng());
+
         return new LocationResponse(
                 childId,
                 konum.getLat(),
@@ -68,22 +79,15 @@ public class ChildLocationService {
         );
     }
 
-    // ✅ PARENT -> LAST LOCATION (ULTRA PRO SECURITY)
+    // ✅ LAST LOCATION
     public LocationResponse getLastLocationForParent(String parentId, String childId) {
 
         ChildEntity child = childRepo.findByCocukUniqueId(childId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Child not found"));
 
-        // 🔥 ULTRA PRO SECURITY CHECK
-        // ChildEntity içinde ebeveynUniqueId field olması lazım
         if (!child.getParent().getEbeveynUniqueId().equals(parentId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Bu çocuk sana ait değil"
-            );
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Bu çocuk sana ait değil");
         }
-
-
 
         CocukKonumEntity last =
                 konumRepo.findTopByChild_CocukUniqueIdOrderByRecordedAtDesc(childId)
@@ -97,8 +101,11 @@ public class ChildLocationService {
         );
     }
 
+    // ⭐⭐⭐ SAFE KID MAP (ULTRA STABLE VERSION)
     public List<MapChildLocation> getMapForParent(String parentId) {
-        List<ChildEntity> children = childRepo.findAllByParent_EbeveynUniqueId(parentId);
+
+        List<ChildEntity> children =
+                childRepo.findAllByParent_EbeveynUniqueId(parentId);
 
         if (children.isEmpty()) return List.of();
 
@@ -106,37 +113,39 @@ public class ChildLocationService {
                 .map(ChildEntity::getCocukUniqueId)
                 .toList();
 
-        Map<String, Object[]> locationMap = konumRepo.findLatestLocationsByChildIds(childIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        Function.identity()
-                ));
+        // 🔥 DUPLICATE KEY FIX (EN ÖNEMLİ SATIR)
+        Map<String, Object[]> locationMap =
+                konumRepo.findLatestLocationsByChildIds(childIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                row -> (String) row[0],
+                                Function.identity(),
+                                (existing, replacement) -> replacement // ⭐ SON KAYIT KAZANSIN
+                        ));
 
         Instant fiveMinutesAgo = Instant.now().minusSeconds(300);
 
         return children.stream()
                 .map(child -> {
+
                     Object[] row = locationMap.get(child.getCocukUniqueId());
+
                     if (row == null) {
                         return new MapChildLocation(
                                 child.getCocukUniqueId(),
                                 child.getCocukAdi() + " " + child.getCocukSoyadi(),
-                                null, null, null, false
+                                null,null,null,false
                         );
                     }
 
                     Object rawTs = row[3];
-                    Instant recordedAt;
-                    if (rawTs instanceof Instant i) {
-                        recordedAt = i;
-                    } else if (rawTs instanceof java.sql.Timestamp ts) {
-                        recordedAt = ts.toInstant();
-                    } else if (rawTs instanceof java.time.OffsetDateTime odt) {
-                        recordedAt = odt.toInstant();
-                    } else {
-                        recordedAt = Instant.now();
-                    }
+
+                    Instant recordedAt =
+                            rawTs instanceof Instant i ? i :
+                                    rawTs instanceof java.sql.Timestamp ts ? ts.toInstant() :
+                                            rawTs instanceof java.time.OffsetDateTime odt ? odt.toInstant() :
+                                                    Instant.now();
+
                     return new MapChildLocation(
                             child.getCocukUniqueId(),
                             child.getCocukAdi() + " " + child.getCocukSoyadi(),
@@ -148,5 +157,4 @@ public class ChildLocationService {
                 })
                 .toList();
     }
-
 }

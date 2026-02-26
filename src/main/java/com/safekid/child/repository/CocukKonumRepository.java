@@ -20,15 +20,11 @@ public interface CocukKonumRepository extends JpaRepository<CocukKonumEntity, Lo
     );
 
     @Query(value = """
-            SELECT ck.cocuk_unique_id, ck.lat, ck.lng, ck.recorded_at
-            FROM cocuk_konum ck
-            INNER JOIN (
-                SELECT cocuk_unique_id, MAX(recorded_at) AS max_recorded
-                FROM cocuk_konum
-                WHERE cocuk_unique_id IN (:childIds)
-                GROUP BY cocuk_unique_id
-            ) latest ON ck.cocuk_unique_id = latest.cocuk_unique_id
-                   AND ck.recorded_at = latest.max_recorded
+            SELECT DISTINCT ON (cocuk_unique_id)
+                cocuk_unique_id, lat, lng, recorded_at
+            FROM cocuk_konum
+            WHERE cocuk_unique_id IN (:childIds)
+            ORDER BY cocuk_unique_id, recorded_at DESC
             """, nativeQuery = true)
     List<Object[]> findLatestLocationsByChildIds(@Param("childIds") List<String> childIds);
 
