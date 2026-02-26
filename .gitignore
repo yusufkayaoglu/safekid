@@ -30,3 +30,7 @@ target/
 src/main/resources/firebase-service-account.json
 src/main/resources/google-service-account.json
 src/main/resources/google-services.json
+
+# Local dev secrets (asla commit etme)
+src/main/resources/application-local.properties
+local.properties
