@@ -3,6 +3,7 @@ package com.safekid.auth.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -19,6 +20,7 @@ public class EmailService {
         return String.valueOf(code);
     }
 
+    @Async
     public void sendVerificationEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -28,6 +30,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendPasswordResetEmail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
