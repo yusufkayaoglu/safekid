@@ -43,12 +43,14 @@ public class AuthService {
         p.setEbeveynAdres(req.ebeveynAdres());
         p.setEbeveynIsAdresi(req.ebeveynIsAdresi());
 
-        p.setEbeveynMailDogrulandi(true);
+        String code = emailService.generateVerificationCode();
+        p.setEbeveynDogrulamaKodu(code);
+        p.setDogrulamaKoduSonKullanma(Instant.now().plus(15, ChronoUnit.MINUTES));
+        p.setEbeveynMailDogrulandi(false);
 
         parentRepo.save(p);
 
         try {
-            String code = emailService.generateVerificationCode();
             emailService.sendVerificationEmail(req.ebeveynMailAdres(), code);
         } catch (Exception e) {
             System.err.println("Mail gönderilemedi: " + e.getMessage());
@@ -86,7 +88,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanıcı bulunamadı"));
 
         if (p.isEbeveynMailDogrulandi())
-            return; // zaten doğrulanmış, sessizce geç
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email zaten doğrulanmış");
 
         if (p.getEbeveynDogrulamaKodu() == null || !p.getEbeveynDogrulamaKodu().equals(req.dogrulamaKodu()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Doğrulama kodu hatalı");
