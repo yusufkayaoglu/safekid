@@ -79,7 +79,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanıcı bulunamadı"));
 
         if (p.isEbeveynMailDogrulandi())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email zaten doğrulanmış");
+            return; // zaten doğrulanmış, sessizce geç
 
         if (p.getEbeveynDogrulamaKodu() == null || !p.getEbeveynDogrulamaKodu().equals(req.dogrulamaKodu()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Doğrulama kodu hatalı");
