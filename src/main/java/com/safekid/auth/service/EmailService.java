@@ -22,21 +22,33 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String to, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("SafeKid - Email Doğrulama Kodu");
-        message.setText("Merhaba,\n\nEmail doğrulama kodunuz: " + code
-                + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject("SafeKid - Email Doğrulama Kodu");
+            message.setText("Merhaba,\n\nEmail doğrulama kodunuz: " + code
+                    + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
+            mailSender.send(message);
+            System.out.println("✓ Mail gönderildi: " + to);
+        } catch (Exception e) {
+            System.err.println("✗ MAIL HATASI: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Async
     public void sendPasswordResetEmail(String to, String code) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("SafeKid - Şifre Sıfırlama Kodu");
-        message.setText("Merhaba,\n\nŞifre sıfırlama kodunuz: " + code
-                + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject("SafeKid - Şifre Sıfırlama Kodu");
+            message.setText("Merhaba,\n\nŞifre sıfırlama kodunuz: " + code
+                    + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
+            mailSender.send(message);
+            System.out.println("✓ Mail gönderildi: " + to);
+        } catch (Exception e) {
+            System.err.println("✗ MAIL HATASI: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
