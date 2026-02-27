@@ -2,6 +2,7 @@ package com.safekid.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Server;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -15,6 +16,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
+                .addServersItem(new Server().url("https://safekid-production.up.railway.app").description("Production"))
+                .addServersItem(new Server().url("http://localhost:8081").description("Local"))
                 .info(new Info()
                         .title("SafeKid API")
                         .description("Ebeveyn-Cocuk Takip Uygulamasi Backend API")
