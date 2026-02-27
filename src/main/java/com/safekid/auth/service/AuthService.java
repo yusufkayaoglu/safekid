@@ -46,6 +46,13 @@ public class AuthService {
         p.setEbeveynMailDogrulandi(true);
 
         parentRepo.save(p);
+
+        try {
+            String code = emailService.generateVerificationCode();
+            emailService.sendVerificationEmail(req.ebeveynMailAdres(), code);
+        } catch (Exception e) {
+            System.err.println("Mail gönderilemedi: " + e.getMessage());
+        }
     }
 
     @Transactional
