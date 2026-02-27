@@ -43,19 +43,9 @@ public class AuthService {
         p.setEbeveynAdres(req.ebeveynAdres());
         p.setEbeveynIsAdresi(req.ebeveynIsAdresi());
 
-        String code = emailService.generateVerificationCode();
-        p.setEbeveynDogrulamaKodu(code);
-        p.setDogrulamaKoduSonKullanma(Instant.now().plus(15, ChronoUnit.MINUTES));
-        p.setEbeveynMailDogrulandi(false);
+        p.setEbeveynMailDogrulandi(true);
 
         parentRepo.save(p);
-
-        try {
-            emailService.sendVerificationEmail(req.ebeveynMailAdres(), code);
-        } catch (Exception e) {
-            // Kayıt yine tamamlansın, kullanıcı sonra resend yapabilir
-            System.err.println("Mail gönderilemedi: " + e.getMessage());
-        }
     }
 
     @Transactional
