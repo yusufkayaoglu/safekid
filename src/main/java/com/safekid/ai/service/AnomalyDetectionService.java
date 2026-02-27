@@ -11,6 +11,7 @@ import com.safekid.ai.repository.AiAnalysisRepository;
 import com.safekid.child.entity.CocukKonumEntity;
 import com.safekid.child.repository.CocukKonumRepository;
 import com.safekid.child.sse.SseEmitterRegistry;
+import com.safekid.notification.FcmService;
 import com.safekid.parent.entity.ChildEntity;
 import com.safekid.parent.repository.ChildRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class AnomalyDetectionService {
     private final AiAnalysisRepository analysisRepository;
     private final LocationDataCollector dataCollector;
     private final SseEmitterRegistry sseEmitterRegistry;
+    private final FcmService fcmService;
     private final ObjectMapper objectMapper;
 
     @Value("${safekid.ai.speed-threshold-kmh}")
@@ -165,6 +167,13 @@ public class AnomalyDetectionService {
                     "summary", result.summary(),
                     "alertId", analysis.getId()
             ));
+
+            // FCM push notification
+            fcmService.sendPush(
+                    child.getParent().getFcmToken(),
+                    child.getCocukAdi() + " için uyarı!",
+                    result.summary()
+            );
         }
 
         return result;
@@ -250,6 +259,13 @@ public class AnomalyDetectionService {
                     "summary", result.summary(),
                     "alertId", analysis.getId()
             ));
+
+            // FCM push notification
+            fcmService.sendPush(
+                    child.getParent().getFcmToken(),
+                    child.getCocukAdi() + " için uyarı!",
+                    result.summary()
+            );
         }
     }
 

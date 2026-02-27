@@ -7,6 +7,7 @@ import com.safekid.ai.entity.AnalysisType;
 import com.safekid.ai.repository.AiAnalysisRepository;
 import com.safekid.child.entity.CocukKonumEntity;
 import com.safekid.child.repository.CocukKonumRepository;
+import com.safekid.notification.FcmService;
 import com.safekid.parent.entity.ChildEntity;
 import com.safekid.parent.repository.ChildRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class DailySummaryService {
     private final ChildRepository childRepository;
     private final AiAnalysisRepository analysisRepository;
     private final LocationDataCollector dataCollector;
+    private final FcmService fcmService;
 
     private static final ZoneId TZ = ZoneId.of("Europe/Istanbul");
 
@@ -110,6 +112,11 @@ public class DailySummaryService {
                 String parentId = child.getParent().getEbeveynUniqueId();
                 generateSummary(parentId, child.getCocukUniqueId(), today);
                 log.info("Daily summary generated for child {}", child.getCocukUniqueId());
+                fcmService.sendPush(
+                        child.getParent().getFcmToken(),
+                        child.getCocukAdi() + " günlük özet",
+                        "Bugünkü hareket özeti hazırlandı."
+                );
             } catch (Exception e) {
                 log.error("Daily summary failed for child {}: {}", child.getCocukUniqueId(), e.getMessage());
             }
