@@ -1,6 +1,7 @@
 package com.safekid.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -29,10 +31,9 @@ public class EmailService {
             message.setText("Merhaba,\n\nEmail doğrulama kodunuz: " + code
                     + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
             mailSender.send(message);
-            System.out.println("✓ Mail gönderildi: " + to);
+            log.info("MAIL_OK: dogrulama maili gonderildi -> {}", to);
         } catch (Exception e) {
-            System.err.println("✗ MAIL HATASI: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
+            log.error("MAIL_HATA: {} - {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 
@@ -45,10 +46,9 @@ public class EmailService {
             message.setText("Merhaba,\n\nŞifre sıfırlama kodunuz: " + code
                     + "\n\nBu kod 15 dakika geçerlidir.\n\nSafeKid");
             mailSender.send(message);
-            System.out.println("✓ Mail gönderildi: " + to);
+            log.info("MAIL_OK: sifre sifirlama maili gonderildi -> {}", to);
         } catch (Exception e) {
-            System.err.println("✗ MAIL HATASI: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
+            log.error("MAIL_HATA: {} - {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 }
