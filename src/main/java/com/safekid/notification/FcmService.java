@@ -1,6 +1,8 @@
 package com.safekid.notification;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
@@ -52,6 +54,30 @@ public class FcmService {
             FirebaseMessaging.getInstance(firebaseApp).sendAsync(message);
         } catch (Exception e) {
             log.warn("Push notification gönderilemedi: {}", e.getMessage());
+        }
+    }
+
+    public void sendAnomalyPush(String fcmToken, String title, String body) {
+        if (firebaseApp == null || fcmToken == null || fcmToken.isBlank()) return;
+
+        try {
+            Message message = Message.builder()
+                    .setToken(fcmToken)
+                    .setNotification(Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setNotification(AndroidNotification.builder()
+                                    .setChannelId("anomaly_alerts")
+                                    .build())
+                            .build())
+                    .putData("type", "anomaly_alert")
+                    .build();
+
+            FirebaseMessaging.getInstance(firebaseApp).sendAsync(message);
+        } catch (Exception e) {
+            log.warn("Anomaly push gönderilemedi: {}", e.getMessage());
         }
     }
 }
