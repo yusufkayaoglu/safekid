@@ -1,11 +1,13 @@
 package com.safekid.billing.repository;
 
+import com.safekid.auth.entity.ParentEntity;
 import com.safekid.billing.entity.SubscriptionEntity;
 import com.safekid.billing.entity.SubscriptionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,4 +55,11 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
             LIMIT 1
             """)
     Optional<SubscriptionEntity> findLatestByParent(@Param("parentId") String parentId);
+
+    /**
+     * Belirtilen abonelik durumuna sahip tüm ebeveynleri döner (tekrarsız).
+     * Premium scheduler'ın hedef listesini oluşturmak için kullanılır.
+     */
+    @Query("SELECT DISTINCT s.parent FROM SubscriptionEntity s WHERE s.status = :status")
+    List<ParentEntity> findParentsWithStatus(@Param("status") SubscriptionStatus status);
 }

@@ -171,7 +171,7 @@ public class AnomalyDetectionService {
             // FCM push notification
             fcmService.sendPush(
                     child.getParent().getFcmToken(),
-                    child.getCocukAdi() + " için uyarı!",
+                    "⚠️ Anomali: " + child.getCocukAdi(),
                     result.summary()
             );
         }
@@ -263,7 +263,7 @@ public class AnomalyDetectionService {
             // FCM push notification
             fcmService.sendPush(
                     child.getParent().getFcmToken(),
-                    child.getCocukAdi() + " için uyarı!",
+                    "⚠️ Anomali: " + child.getCocukAdi(),
                     result.summary()
             );
         }
